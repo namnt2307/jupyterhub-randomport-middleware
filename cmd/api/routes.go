@@ -17,9 +17,11 @@ type PostDataFormat struct {
 	MemoryRequest string `json:"memoryRequest"`
 }
 type ReturnDataFormat struct {
-	HostIP   string `json:"hostIP"`
-	HostName string `json:"hostName"`
-	HostPort int    `json:"hostPort"`
+	PodName      string `json:"podName"`
+	NodeSelector string `json:"nodeSelector"`
+	HostIP       string `json:"hostIP"`
+	HostName     string `json:"hostName"`
+	HostPort     int    `json:"hostPort"`
 }
 
 func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +33,7 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		w.Write([]byte("hello"))
-		App.infoLog.Printf("Client: %v \tPath: %v \tResponse: %v \tCode: %v \n", clientIP, r.RequestURI, "hello", http.StatusOK)
+		App.infoLog.Printf("%v \t%v \t%v \t%v \n", clientIP, "hello", r.RequestURI, http.StatusOK)
 
 	case http.MethodPost:
 		var myData PostDataFormat
@@ -42,10 +44,10 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//get ip and return
-		hostIP, hostName, hostPort := k8s.MakePod(App.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
+		podName, nodeSelector, hostIP, hostName, hostPort := k8s.MakePod(App.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
 		w.Header().Set("Content-Type", "application/json")
-		App.infoLog.Printf("Client: %v \tPath: %v \tResponse: %v-%v:%v \tCode: %v \n", clientIP, r.RequestURI, hostName, hostIP, hostPort, http.StatusOK)
-		json.NewEncoder(w).Encode(&ReturnDataFormat{HostIP: hostIP, HostName: hostName, HostPort: hostPort})
+		App.infoLog.Printf("%v \t%v-%v-%v-%v:%v \t%v \t%v \n", clientIP, podName, nodeSelector, hostName, hostIP, hostPort, r.RequestURI, http.StatusOK)
+		json.NewEncoder(w).Encode(&ReturnDataFormat{PodName: podName, NodeSelector: nodeSelector, HostIP: hostIP, HostName: hostName, HostPort: hostPort})
 
 	default:
 		App.ClientError(w, http.StatusMethodNotAllowed)

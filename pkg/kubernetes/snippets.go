@@ -97,7 +97,7 @@ func GetFreePort(hostIP string) (int, error) {
 	defer l.Close()
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
-func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest string) (hostIP, hostName string, hostPort int) {
+func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest string) (podname, nodeselector, hostIP, hostName string, hostPort int) {
 	//make pod spec
 	pod := MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest)
 	// create pod
@@ -121,6 +121,6 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	}
 	var zero int64 = 0
 	clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{GracePeriodSeconds: &zero})
-	return podSpec.Status.HostIP, podSpec.Spec.NodeName, port
+	return podName, nodeSelector, podSpec.Status.HostIP, podSpec.Spec.NodeName, port
 
 }
