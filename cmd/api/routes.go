@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	k8s "github.com/namnt2307/jupyterhub-freeport/pkg/kubernetes"
@@ -26,12 +25,11 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 	clientIP := r.Header.Get("X-Original-Forwarded-For")
-	log.Println(clientIP)
 	// handle GET/POST method
 	switch r.Method {
 	case http.MethodGet:
 		w.Write([]byte("hello"))
-		App.infoLog.Printf("Path: %v \tResponse: %v \tCode: %v \n", r.RequestURI, "hello", http.StatusOK)
+		App.infoLog.Printf("Client: %v \tPath: %v \tResponse: %v \tCode: %v \n", clientIP, r.RequestURI, "hello", http.StatusOK)
 
 	case http.MethodPost:
 		var myData PostDataFormat
@@ -44,7 +42,7 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 		//get ip and return
 		hostIP := k8s.MakePod(App.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
 		w.Header().Set("Content-Type", "application/json")
-		App.infoLog.Printf("Path: %v \tResponse: %v \tCode: %v \n", r.RequestURI, hostIP, http.StatusOK)
+		App.infoLog.Printf("Client: %v \tPath: %v \tResponse: %v \tCode: %v \n", clientIP, r.RequestURI, hostIP, http.StatusOK)
 		json.NewEncoder(w).Encode(&ReturnDataFormat{HostIP: hostIP})
 
 	default:
