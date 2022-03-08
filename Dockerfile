@@ -7,7 +7,7 @@ RUN apk update && apk add --no-cache tzdata && apk add curl jq gettext && \
 
 WORKDIR /app 
 
-COPY main /app/main
+COPY bin/main /app/main
 
 EXPOSE 8000
 
