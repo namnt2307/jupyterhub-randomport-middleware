@@ -15,11 +15,12 @@ import (
 func InitKubernetes() *kubernetes.Clientset {
 	// kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
 	// log.Println("INFO\t", "Using kubeconfig ", kubeconfig)
-	// Load kubeconfig
+	//Load kubeconfig
 	// config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
+
 	log.Println("INFO\t", "Loading Service account")
 	config, err := rest.InClusterConfig()
 	if err != nil {

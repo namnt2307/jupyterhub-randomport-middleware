@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	k8s "github.com/namnt2307/jupyterhub-freeport/pkg/kubernetes"
@@ -24,7 +25,8 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/getSpawnNode" {
 		http.NotFound(w, r)
 	}
-
+	clientIP := r.Header.Get("X-Forwarded-For")
+	log.Println(clientIP)
 	// handle GET/POST method
 	switch r.Method {
 	case http.MethodGet:
