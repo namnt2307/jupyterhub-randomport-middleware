@@ -25,7 +25,7 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/getSpawnNode" {
 		http.NotFound(w, r)
 	}
-	clientIP := r.Header.Get("X-Forwarded-For")
+	clientIP := r.Header.Get("X-Original-Forwarded-For")
 	log.Println(clientIP)
 	// handle GET/POST method
 	switch r.Method {
