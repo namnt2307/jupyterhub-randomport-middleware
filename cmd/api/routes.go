@@ -19,6 +19,7 @@ type PostDataFormat struct {
 type ReturnDataFormat struct {
 	HostIP   string `json:"hostIP"`
 	HostName string `json:"hostName"`
+	HostPort int    `json:"hostPort"`
 }
 
 func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
@@ -41,10 +42,10 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//get ip and return
-		hostIP, hostName := k8s.MakePod(App.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
+		hostIP, hostName, hostPort := k8s.MakePod(App.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
 		w.Header().Set("Content-Type", "application/json")
 		App.infoLog.Printf("Client: %v \tPath: %v \tResponse: %v \tCode: %v \n", clientIP, r.RequestURI, hostIP, http.StatusOK)
-		json.NewEncoder(w).Encode(&ReturnDataFormat{HostIP: hostIP, HostName: hostName})
+		json.NewEncoder(w).Encode(&ReturnDataFormat{HostIP: hostIP, HostName: hostName, HostPort: hostPort})
 
 	default:
 		App.ClientError(w, http.StatusMethodNotAllowed)

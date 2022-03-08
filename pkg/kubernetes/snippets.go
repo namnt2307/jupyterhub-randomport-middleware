@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"log"
+	"net"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -82,8 +83,21 @@ func MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryL
 		},
 	}
 }
+func GetFreePort(hostIP string) (int, error) {
+	host := hostIP + ":0"
+	addr, err := net.ResolveTCPAddr("tcp", host)
+	if err != nil {
+		return 0, err
+	}
 
-func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest string) (hostIP, hostName string) {
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
+}
+func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest string) (hostIP, hostName string, hostPort int) {
 	//make pod spec
 	pod := MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest)
 	// create pod
@@ -93,15 +107,20 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	}
 	// wait until pod is create
 	time.Sleep(10 * time.Second)
+
 	// log.Printf("%v \n", podCreate.Status.HostIP)
 	// Check pod
 
-	nodeIP, err := clientset.CoreV1().Pods(pod.Namespace).Get(context.TODO(), podName, metav1.GetOptions{})
+	podSpec, err := clientset.CoreV1().Pods(pod.Namespace).Get(context.TODO(), podName, metav1.GetOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
+	port, err := GetFreePort(podSpec.Status.HostIP)
+	if err != nil {
+		log.Println(err)
+	}
 	var zero int64 = 0
 	clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{GracePeriodSeconds: &zero})
-	return nodeIP.Status.HostIP, nodeIP.Spec.NodeName
+	return podSpec.Status.HostIP, podSpec.Spec.NodeName, port
 
 }
