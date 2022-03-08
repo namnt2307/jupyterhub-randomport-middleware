@@ -42,20 +42,6 @@ spec:
             requests:
               cpu: 300m
               memory: 600Mi
-          livenessProbe:
-            httpGet:
-              path: /getSpawnNode
-              port: 8000
-            initialDelaySeconds: 30 
-            failureThreshold: 3
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /getSpawnNode
-              port: 8000
-            initialDelaySeconds: 30
-            failureThreshold: 3
-            periodSeconds: 5
           lifecycle:
             preStop:
               exec:
