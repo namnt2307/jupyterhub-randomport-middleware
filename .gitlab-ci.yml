@@ -6,6 +6,7 @@ stages:
 variables:
   HTTP_PROXY: "http://proxy.hcm.fpt.vn:80"
   HTTPS_PROXY: "http://proxy.hcm.fpt.vn:80"
+  NO_PROXY: "127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,bigdata-registry.local,.cluster.local,*.local,172.27.11.210,172.27.11.211,172.27.11.230,172.27.11.231,172.24.178.0/24"
   DOCKER_REGISTRY: "repo.bigdata.local"
   GO111MODULE: "on" 
   CGO_ENABLED: 1  
