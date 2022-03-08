@@ -15,7 +15,7 @@ import (
 func InitKubernetes() *kubernetes.Clientset {
 	// kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
 	// log.Println("INFO\t", "Using kubeconfig ", kubeconfig)
-	//Load kubeconfig
+	// Load kubeconfig
 	// config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	// if err != nil {
 	// 	log.Fatal(err)
@@ -64,6 +64,17 @@ func MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryL
 					// 	"60",
 					// },
 					Resources: podResource,
+					Env: []v1.EnvVar{
+						{
+							Name: "hihi",
+							ValueFrom: &v1.EnvVarSource{
+								FieldRef: &v1.ObjectFieldSelector{
+									APIVersion: "v1",
+									FieldPath:  "spec.nodeName",
+								},
+							},
+						},
+					},
 				},
 			},
 			RestartPolicy: v1.RestartPolicyNever,
@@ -72,7 +83,7 @@ func MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryL
 	}
 }
 
-func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest string) string {
+func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest string) (hostIP, hostName string) {
 	//make pod spec
 	pod := MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest)
 	// create pod
@@ -91,6 +102,6 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	}
 	var zero int64 = 0
 	clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{GracePeriodSeconds: &zero})
-	return nodeIP.Status.HostIP
+	return nodeIP.Status.HostIP, nodeIP.Spec.NodeName
 
 }
