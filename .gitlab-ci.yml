@@ -156,9 +156,9 @@ dockerize:production:
     - export IMAGE_TAG=${DOCKER_REGISTRY}/${CI_ENVIRONMENT_NAME}/${APP_NAME}:${APP_VER}
     - export K8S_CLUSTER=${K8S_CLUSTER_DEV}
     - export K8S_TOKEN=${K8S_TOKEN_DEV}
-    - export NAMESPACE=jupyterhub
+    - export NAMESPACE=default
     - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
-    - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${CI_ENVIRONMENT_NAME}
+    - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${NAMESPACE}
   only:
     refs:
       - master
@@ -176,7 +176,7 @@ dockerize:production:
     - export K8S_TOKEN=${K8S_ML_TOKEN_PROD}
     - export NAMESPACE=jupyterhub-new
     - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
-    - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${CI_ENVIRONMENT_NAME}
+    - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${NAMESPACE}
   when: manual
   only:
     refs:
