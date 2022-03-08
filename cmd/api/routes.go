@@ -28,8 +28,8 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 	// handle GET/POST method
 	switch r.Method {
 	case http.MethodGet:
-		App.infoLog.Printf("%v \t %v \n", r.RequestURI, r.Response.StatusCode)
 		w.Write([]byte("hello"))
+		App.infoLog.Printf("Path: %v \tResponse: %v \tCode: %v \n", r.RequestURI, "hello", http.StatusOK)
 
 	case http.MethodPost:
 		var myData PostDataFormat
@@ -42,8 +42,8 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 		//get ip and return
 		hostIP := k8s.MakePod(App.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
 		w.Header().Set("Content-Type", "application/json")
+		App.infoLog.Printf("Path: %v \tResponse: %v \tCode: %v \n", r.RequestURI, hostIP, http.StatusOK)
 		json.NewEncoder(w).Encode(&ReturnDataFormat{HostIP: hostIP})
-		App.infoLog.Printf("%v \t %v \thostIp: %v \n", r.RequestURI, r.Response.StatusCode, r.Response)
 
 	default:
 		App.ClientError(w, http.StatusMethodNotAllowed)

@@ -14,25 +14,26 @@ import (
 
 func InitKubernetes() *kubernetes.Clientset {
 	// kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-	// log.Println("Using kubeconfig ", kubeconfig)
-
+	// log.Println("INFO\t", "Using kubeconfig ", kubeconfig)
 	// Load kubeconfig
-	log.Println("Loading service account")
 	// config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
+	log.Println("INFO\t", "Loading Service account")
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		panic(err.Error())
 	}
+	log.Println("INFO\t Load Service account successfully")
 
 	//Load clientset
-	log.Println("Load kubeconfig successfully \t Creating Clientset")
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("INFO\t Creating Clientset")
+
 	return clientset
 }
 func MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest string) *v1.Pod {

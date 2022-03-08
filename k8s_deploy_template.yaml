@@ -71,9 +71,9 @@ metadata:
 spec:
   ports:
     - name: http
-      port: 8000
+      port: 80
       protocol: TCP
-      targetPort: 80
+      targetPort: 8000
   selector:
     app: ${APP_NAME}
   sessionAffinity: None
