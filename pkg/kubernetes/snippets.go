@@ -3,27 +3,30 @@ package kubernetes
 import (
 	"context"
 	"log"
-	"os"
-	"path/filepath"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/rest"
 )
 
 func InitKubernetes() *kubernetes.Clientset {
-	kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-	log.Println("Using kubeconfig ", kubeconfig)
+	// kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
+	// log.Println("Using kubeconfig ", kubeconfig)
 
 	// Load kubeconfig
-	log.Println("Loading kubeconfig")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	log.Println("Loading service account")
+	// config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	config, err := rest.InClusterConfig()
 	if err != nil {
-		log.Fatal(err)
+		panic(err.Error())
 	}
+
 	//Load clientset
 	log.Println("Load kubeconfig successfully \t Creating Clientset")
 	clientset, err := kubernetes.NewForConfig(config)

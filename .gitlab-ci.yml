@@ -1,0 +1,196 @@
+stages:
+  - build
+  - publish
+  - deploy
+
+variables:
+  HTTP_PROXY: "http://proxy.hcm.fpt.vn:80"
+  HTTPS_PROXY: "http://proxy.hcm.fpt.vn:80"
+  DOCKER_REGISTRY: "repo.bigdata.local"
+  GO111MODULE: "on" 
+  CGO_ENABLED: 1  
+  GOARCH: "amd64" 
+  GOOS: "linux"
+  BUILD_PATH: "cmd/api"
+  APP_NAME: ${CI_PROJECT_NAME}
+.compile:
+  stage: build
+  image:
+    name: ${DOCKER_REGISTRY}/golang:1.17.8-alpine3.14
+    entrypoint: [""]
+  before_script:
+    - export APP_VER=${CI_PIPELINE_ID}-${CI_COMMIT_SHORT_SHA}
+  script:
+    - echo "$APP_NAME $APP_VER"
+    - go mod vendor
+    - go build -o main ${BUILD_PATH}/*
+  only:
+    changes:
+      - "CHANGELOG.md"
+  artifacts:
+    name: ${APP_NAME}-${CI_COMMIT_SHORT_SHA}
+    expire_in: 1 days
+    paths:
+      - main
+  cache:
+    # if you want to have a separate cache per branch, uncomment the next line
+    # key: "$CI_BUILD_REF_NAME"
+    untracked: true
+    paths:
+      - "vendor/"
+
+compile:dev:
+  extends:
+    - .compile
+  environment:
+    name: dev
+  only:
+    refs:
+      - master
+
+# compile:staging:
+#   extends:
+#     - .compile
+#   environment:
+#     name: staging
+#   only:
+#     refs:
+#       - testing
+
+compile:production:
+  extends:
+    - .compile
+  environment:
+    name: prod
+  only:
+    refs:
+      - release
+
+# compile:prod:
+#   extends:
+#     - .compile
+#   environment:
+#     name: prod
+#   only:
+#     refs:
+#       - prod
+
+.dockerize:
+  stage: publish
+  script:
+    - export APP_VER=${CI_PIPELINE_ID}-${CI_COMMIT_SHORT_SHA}
+    - export IMAGE_TAG=${DOCKER_REGISTRY}/${CI_ENVIRONMENT_NAME}/${APP_NAME}:${APP_VER}
+    - docker login -u ${REGISTRY_USER} -p ${REGISTRY_PASS} ${DOCKER_REGISTRY}
+    - docker build -t ${IMAGE_TAG} -f Dockerfile --build-arg http_proxy=${HTTP_PROXY}  --build-arg https_proxy=${HTTPS_PROXY} .
+    - docker push ${IMAGE_TAG}
+    - docker rmi -f ${IMAGE_TAG}
+  only:
+    changes:
+      - "CHANGELOG.md"
+  tags:
+    - runner-2
+
+dockerize:dev:
+  extends:
+    - .dockerize
+  environment:
+    name: dev
+  dependencies:
+    - compile:dev
+  only:
+    refs:
+      - master
+
+# dockerize:staging:
+#   extends:
+#     - .dockerize
+#   environment:
+#     name: staging
+#   dependencies:
+#     - compile:staging
+#   only:
+#     refs:
+#       - testing
+
+dockerize:production:
+  extends:
+    - .dockerize
+  environment:
+    name: prod
+  dependencies:
+    - compile:production
+  only:
+    refs:
+      - master
+
+# dockerize:prod:
+#   extends:
+#     - .dockerize
+#   environment:
+#     name: prod
+#   dependencies:
+#     - compile:prod
+#   only:
+#     refs:
+#       - prod
+
+.deploy:
+  image:
+    name: ${DOCKER_REGISTRY}/kubectl-helm:3.54
+    entrypoint: [""]
+  stage: deploy
+  dependencies: []
+  only:
+    changes:
+      - "CHANGELOG.md"
+
+.deploy-dev:
+  extends:
+    - .deploy
+  environment:
+    name: dev
+  script:
+    - export APP_VER=${CI_PIPELINE_ID}-${CI_COMMIT_SHORT_SHA}
+    - export IMAGE_TAG=${DOCKER_REGISTRY}/${CI_ENVIRONMENT_NAME}/${APP_NAME}:${APP_VER}
+    - export K8S_CLUSTER=${K8S_CLUSTER_DEV}
+    - export K8S_TOKEN=${K8S_TOKEN_DEV}
+    - export NAMESPACE=jupyterhub
+    - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
+    - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${CI_ENVIRONMENT_NAME}
+  only:
+    refs:
+      - master
+
+
+.deploy-production:
+  extends:
+    - .deploy
+  environment:
+    name: prod
+  script:
+    - export APP_VER=${CI_PIPELINE_ID}-${CI_COMMIT_SHORT_SHA}
+    - export IMAGE_TAG=${DOCKER_REGISTRY}/${CI_ENVIRONMENT_NAME}/${APP_NAME}:${APP_VER}
+    - export K8S_CLUSTER=${K8S_ML_CLUSTER_PROD}
+    - export K8S_TOKEN=${K8S_ML_TOKEN_PROD}
+    - export NAMESPACE=jupyterhub-new
+    - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
+    - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${CI_ENVIRONMENT_NAME}
+  when: manual
+  only:
+    refs:
+      - release
+
+
+deploy:dev:
+  extends:
+    - .deploy-dev
+  before_script:
+    - export HOST_APP=dev.bigdata.local
+    - export API_PATH=dev-jupyterhub-freeport
+
+deploy:production:
+  extends:
+    - .deploy-production
+  before_script:
+    - export HOST_APP=dev.bigdata.local
+    - export API_PATH=prod-jupyterhub-freeport
