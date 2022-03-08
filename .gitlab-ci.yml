@@ -24,6 +24,7 @@ variables:
     - echo "$APP_NAME $APP_VER"
     - go mod vendor
     - go build -o bin/main ${BUILD_PATH}/*
+    - ls -al
   # only:
     # changes:
       # - "CHANGELOG.md"
@@ -31,13 +32,13 @@ variables:
     name: ${APP_NAME}-${CI_COMMIT_SHORT_SHA}
     expire_in: 1 days
     paths:
-      - "bin/"
+      - bin/
   cache:
     # if you want to have a separate cache per branch, uncomment the next line
     # key: "$CI_BUILD_REF_NAME"
     untracked: true
     paths:
-      - "vendor/"
+      - vendor/
 
 compile:dev:
   extends:
