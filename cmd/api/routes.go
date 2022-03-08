@@ -21,13 +21,14 @@ type ReturnDataFormat struct {
 }
 
 func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/api/getSpawnNode" {
+	if r.URL.Path != "/getSpawnNode" {
 		http.NotFound(w, r)
 	}
 
 	// handle GET/POST method
 	switch r.Method {
 	case http.MethodGet:
+		App.infoLog.Printf("%v \t %v \n", r.RequestURI, r.Response.StatusCode)
 		w.Write([]byte("hello"))
 
 	case http.MethodPost:
@@ -42,6 +43,7 @@ func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 		hostIP := k8s.MakePod(App.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(&ReturnDataFormat{HostIP: hostIP})
+		App.infoLog.Printf("%v \t %v \thostIp: %v \n", r.RequestURI, r.Response.StatusCode, r.Response)
 
 	default:
 		App.ClientError(w, http.StatusMethodNotAllowed)
