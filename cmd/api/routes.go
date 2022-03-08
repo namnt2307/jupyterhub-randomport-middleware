@@ -20,13 +20,16 @@ type ReturnDataFormat struct {
 	HostIP string `json:"hostIP"`
 }
 
-func (app *application) getport(w http.ResponseWriter, r *http.Request) {
+func (App *Application) GetPort(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/api/getSpawnNode" {
 		http.NotFound(w, r)
 	}
+
+	// handle GET/POST method
 	switch r.Method {
 	case http.MethodGet:
 		w.Write([]byte("hello"))
+
 	case http.MethodPost:
 		var myData PostDataFormat
 		err := json.NewDecoder(r.Body).Decode(&myData)
@@ -34,13 +37,14 @@ func (app *application) getport(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		//get ip
-		hostIP := k8s.MakePod(app.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
 
+		//get ip and return
+		hostIP := k8s.MakePod(App.clientSet, myData.Namespace, myData.PodName, myData.NodeSelector, myData.CpuLimit, myData.CpuRequest, myData.MemoryLimit, myData.MemoryRequest)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(&ReturnDataFormat{HostIP: hostIP})
+
 	default:
-		app.clientError(w, http.StatusMethodNotAllowed)
+		App.ClientError(w, http.StatusMethodNotAllowed)
 	}
 
 }

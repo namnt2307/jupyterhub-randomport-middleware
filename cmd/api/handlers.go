@@ -2,8 +2,8 @@ package main
 
 import "net/http"
 
-func (app *application) routes() *http.ServeMux {
+func (App *Application) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/getSpawnNode", app.getport)
+	mux.HandleFunc("/api/getSpawnNode", App.GetPort)
 	return mux
 }

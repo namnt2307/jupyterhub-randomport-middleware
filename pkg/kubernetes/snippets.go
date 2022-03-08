@@ -15,15 +15,17 @@ import (
 )
 
 func InitKubernetes() *kubernetes.Clientset {
-	kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "de.yml")
+	kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
 	log.Println("Using kubeconfig ", kubeconfig)
 
 	// Load kubeconfig
+	log.Println("Loading kubeconfig")
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 	//Load clientset
+	log.Println("Load kubeconfig successfully \t Creating Clientset")
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatal(err)
@@ -59,7 +61,8 @@ func MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryL
 					Resources: podResource,
 				},
 			},
-			NodeSelector: map[string]string{nodeSelector: "true"},
+			RestartPolicy: v1.RestartPolicyNever,
+			NodeSelector:  map[string]string{nodeSelector: "true"},
 		},
 	}
 }
@@ -68,19 +71,21 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	//make pod spec
 	pod := MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest)
 	// create pod
-	podCreate, err := clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
+	_, err := clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	// wait until pod is create
-	time.Sleep(5 * time.Second)
-	log.Printf("%v \n", podCreate.Status.HostIP)
+	time.Sleep(10 * time.Second)
+	// log.Printf("%v \n", podCreate.Status.HostIP)
 	// Check pod
 
-	// nodeIP, err := clientset.CoreV1().Pods(pod.Namespace).Get(context.TODO(), podName, metav1.GetOptions{})
-	// if err != nil {
-	// log.Fatal(err)
-	// }
-	return podCreate.Status.HostIP
+	nodeIP, err := clientset.CoreV1().Pods(pod.Namespace).Get(context.TODO(), podName, metav1.GetOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	var zero int64 = 0
+	clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{GracePeriodSeconds: &zero})
+	return nodeIP.Status.HostIP
 
 }
