@@ -11,4 +11,4 @@ COPY bin/main /app/main
 
 EXPOSE 8000
 
-CMD ["./app/main"]
+CMD ["/app/main"]
