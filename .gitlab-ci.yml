@@ -24,14 +24,14 @@ variables:
     - echo "$APP_NAME $APP_VER"
     - go mod vendor
     - go build -o bin/main ${BUILD_PATH}/*
-  only:
-    changes:
-      - "CHANGELOG.md"
+  # only:
+    # changes:
+      # - "CHANGELOG.md"
   artifacts:
     name: ${APP_NAME}-${CI_COMMIT_SHORT_SHA}
     expire_in: 1 days
     paths:
-      - bin/
+      - "bin/"
   cache:
     # if you want to have a separate cache per branch, uncomment the next line
     # key: "$CI_BUILD_REF_NAME"
@@ -84,9 +84,9 @@ compile:production:
     - docker build -t ${IMAGE_TAG} -f Dockerfile --build-arg http_proxy=${HTTP_PROXY}  --build-arg https_proxy=${HTTPS_PROXY} .
     - docker push ${IMAGE_TAG}
     - docker rmi -f ${IMAGE_TAG}
-  only:
-    changes:
-      - "CHANGELOG.md"
+  # only:
+    # changes:
+      # - "CHANGELOG.md"
   tags:
     - runner-2
 
@@ -121,7 +121,7 @@ dockerize:production:
     - compile:production
   only:
     refs:
-      - master
+      - release
 
 # dockerize:prod:
 #   extends:
@@ -140,9 +140,9 @@ dockerize:production:
     entrypoint: [""]
   stage: deploy
   dependencies: []
-  only:
-    changes:
-      - "CHANGELOG.md"
+  # only:
+    # changes:
+      # - "CHANGELOG.md"
 
 .deploy-dev:
   extends:
