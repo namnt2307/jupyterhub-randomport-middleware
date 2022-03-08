@@ -9,6 +9,6 @@ WORKDIR /app
 
 COPY bin/main /app/main
 
-EXPOSE 8000
+EXPOSE 2307
 
 CMD ["/app/main"]

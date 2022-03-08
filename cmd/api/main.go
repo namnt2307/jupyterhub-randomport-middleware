@@ -19,7 +19,7 @@ type Application struct {
 
 func main() {
 	// default port
-	addr := flag.String("addr", ":8000", "HTTP network address")
+	addr := flag.String("addr", ":2307", "HTTP network address")
 	flag.Parse()
 
 	// init log

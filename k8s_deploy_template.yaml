@@ -22,6 +22,7 @@ spec:
       labels:
         app: ${APP_NAME}
     spec:
+      hostNetwork: true
       serviceAccountName: jupyterhub
       hostAliases:
         - ip: "172.24.178.16"
@@ -59,7 +60,7 @@ spec:
     - name: http
       port: 80
       protocol: TCP
-      targetPort: 8000
+      targetPort: 2307
   selector:
     app: ${APP_NAME}
   sessionAffinity: None
