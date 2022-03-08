@@ -154,9 +154,9 @@ dockerize:production:
   script:
     - export APP_VER=${CI_PIPELINE_ID}-${CI_COMMIT_SHORT_SHA}
     - export IMAGE_TAG=${DOCKER_REGISTRY}/${CI_ENVIRONMENT_NAME}/${APP_NAME}:${APP_VER}
-    - export K8S_CLUSTER=${K8S_CLUSTER_DEV}
-    - export K8S_TOKEN=${K8S_TOKEN_DEV}
-    - export NAMESPACE=default
+    - export K8S_CLUSTER=${K8S_ML_CLUSTER_DEV}
+    - export K8S_TOKEN=${K8S_ML_TOKEN_DEV}
+    - export NAMESPACE=jupyterhub
     - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
     - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${NAMESPACE}
   only:
