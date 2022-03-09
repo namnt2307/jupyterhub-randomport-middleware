@@ -100,7 +100,7 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	//make pod spec
 	pod := MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest)
 	// create pod
-	_, err := clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
+	_, err := clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{"All"}})
 	if err != nil {
 		log.Fatal(err)
 	}
