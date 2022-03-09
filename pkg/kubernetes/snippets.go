@@ -106,7 +106,7 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 		log.Fatal(err)
 	}
 	// wait until pod is create
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	// log.Printf("%v \n", podCreate.Status.HostIP)
 	// Check pod
