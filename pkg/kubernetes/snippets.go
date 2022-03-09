@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"time"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -100,13 +101,12 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	//make pod spec
 	pod := MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest)
 	// create pod
-	podDryRun, err := clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{"All"}})
+	_, err := clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(podDryRun.Spec.NodeName)
 	// wait until pod is create
-	// time.Sleep(3 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	// log.Printf("%v \n", podCreate.Status.HostIP)
 	// Check pod
@@ -115,13 +115,13 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(podSpec)
+
 	port, err := GetFreePort(podSpec.Status.HostIP)
 	if err != nil {
 		log.Println(err)
 	}
-	// var zero int64 = 0
-	// clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{GracePeriodSeconds: &zero})
+	var zero int64 = 0
+	clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{GracePeriodSeconds: &zero})
 	return podName, nodeSelector, podSpec.Status.HostIP, podSpec.Spec.NodeName, port
 
 }
