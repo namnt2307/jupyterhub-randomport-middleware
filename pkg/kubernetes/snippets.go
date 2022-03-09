@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net"
-	"time"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -106,7 +105,7 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 		log.Fatal(err)
 	}
 	// wait until pod is create
-	time.Sleep(3 * time.Second)
+	// time.Sleep(3 * time.Second)
 
 	// log.Printf("%v \n", podCreate.Status.HostIP)
 	// Check pod
