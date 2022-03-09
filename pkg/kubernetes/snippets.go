@@ -104,7 +104,7 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(podDryRun.Spec.NodeSelector)
+	log.Println(podDryRun.Spec.NodeName)
 	// wait until pod is create
 	// time.Sleep(3 * time.Second)
 
