@@ -100,10 +100,11 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	//make pod spec
 	pod := MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest)
 	// create pod
-	_, err := clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{"All"}})
+	podDryRun, err := clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{DryRun: []string{"All"}})
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println(podDryRun)
 	// wait until pod is create
 	// time.Sleep(3 * time.Second)
 
@@ -114,12 +115,13 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println(podSpec)
 	port, err := GetFreePort(podSpec.Status.HostIP)
 	if err != nil {
 		log.Println(err)
 	}
-	var zero int64 = 0
-	clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{GracePeriodSeconds: &zero})
+	// var zero int64 = 0
+	// clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{GracePeriodSeconds: &zero})
 	return podName, nodeSelector, podSpec.Status.HostIP, podSpec.Spec.NodeName, port
 
 }
