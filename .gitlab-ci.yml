@@ -14,6 +14,8 @@ variables:
   GOOS: "linux"
   BUILD_PATH: "cmd/api"
   APP_NAME: ${CI_PROJECT_NAME}
+
+  
 .compile:
   stage: build
   image:
@@ -25,10 +27,9 @@ variables:
     - echo "$APP_NAME $APP_VER"
     - go mod vendor
     - go build -o bin/main ${BUILD_PATH}/*
-    - ls -al
-  # only:
-    # changes:
-      # - "CHANGELOG.md"
+  only:
+    changes:
+      - "CHANGELOG.md"
   artifacts:
     name: ${APP_NAME}-${CI_COMMIT_SHORT_SHA}
     expire_in: 1 days
@@ -86,9 +87,9 @@ compile:production:
     - docker build -t ${IMAGE_TAG} -f Dockerfile --build-arg http_proxy=${HTTP_PROXY}  --build-arg https_proxy=${HTTPS_PROXY} .
     - docker push ${IMAGE_TAG}
     - docker rmi -f ${IMAGE_TAG}
-  # only:
-    # changes:
-      # - "CHANGELOG.md"
+  only:
+    changes:
+      - "CHANGELOG.md"
   tags:
     - runner-2
 
@@ -142,9 +143,9 @@ dockerize:production:
     entrypoint: [""]
   stage: deploy
   dependencies: []
-  # only:
-    # changes:
-      # - "CHANGELOG.md"
+  only:
+    changes:
+      - "CHANGELOG.md"
 
 .deploy-dev:
   extends:
