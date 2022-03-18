@@ -4,6 +4,11 @@
 This api is use to get free port for Jupyterhub on Kubernetes when single user use hostNetwork: "true"
 ```
 ### How to use
+```
+echo "net.ipv4.ip_nonlocal_bind=1" >> /etc/sysctl.conf
+
+sysctl -p
+```
 ````
 curl -X POST "http://localhost:2307/getSpawnNode" -H "Content-type: application/json" -d '{"namespace": "default","podName":"namnt96","nodeSelector":"cpu","cpuLimit":"500m","cpuRequest":"200m","memoryRequest":"200M","memoryLimit":"500M"}'
 ````
@@ -53,3 +58,4 @@ random_port: |
         print("node selector", spawner.port,spawner.node_selector)
       c.KubeSpawner.pre_spawn_hook = custom_pre_spawn_hook
 ````
+### Error can not assign
