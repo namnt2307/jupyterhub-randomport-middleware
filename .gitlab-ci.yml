@@ -48,7 +48,7 @@ compile:dev:
     name: dev
   only:
     refs:
-      - master
+      - develop
 
 # compile:staging:
 #   extends:
@@ -66,7 +66,7 @@ compile:production:
     name: prod
   only:
     refs:
-      - release
+      - master
 
 # compile:prod:
 #   extends:
@@ -101,7 +101,7 @@ dockerize:dev:
     - compile:dev
   only:
     refs:
-      - master
+      - develop
 
 # dockerize:staging:
 #   extends:
@@ -123,7 +123,7 @@ dockerize:production:
     - compile:production
   only:
     refs:
-      - release
+      - master
 
 # dockerize:prod:
 #   extends:
@@ -156,13 +156,11 @@ dockerize:production:
     - export IMAGE_TAG=${DOCKER_REGISTRY}/${CI_ENVIRONMENT_NAME}/${APP_NAME}:${APP_VER}
     - export K8S_CLUSTER=${K8S_ML_CLUSTER_DEV}
     - export K8S_TOKEN=${K8S_ML_TOKEN_DEV}
-    - export NAMESPACE=jupyterhub
-    - export SERVICE_ACCOUNT=jupyterhub-new
     - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
     - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${NAMESPACE}
   only:
     refs:
-      - master
+      - develop
 
 
 .deploy-production:
@@ -175,14 +173,12 @@ dockerize:production:
     - export IMAGE_TAG=${DOCKER_REGISTRY}/${CI_ENVIRONMENT_NAME}/${APP_NAME}:${APP_VER}
     - export K8S_CLUSTER=${K8S_ML_CLUSTER_PROD}
     - export K8S_TOKEN=${K8S_ML_TOKEN_PROD}
-    - export NAMESPACE=jupyterhub-new
-    - export SERVICE_ACCOUNT=jupyterhub-api
     - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
     - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${NAMESPACE}
   when: manual
   only:
     refs:
-      - release
+      - master
 
 
 deploy:dev:
@@ -191,6 +187,9 @@ deploy:dev:
   before_script:
     - export HOST_APP=dev.bigdata.local
     - export API_PATH=dev-jupyterhub-freeport
+    - export NAMESPACE=jupyterhub
+    - export SERVICE_ACCOUNT=jupyterhub
+
 
 deploy:production:
   extends:
@@ -198,3 +197,5 @@ deploy:production:
   before_script:
     - export HOST_APP=dev.bigdata.local
     - export API_PATH=prod-jupyterhub-freeport
+    - export NAMESPACE=jupyterhub-new
+    - export SERVICE_ACCOUNT=jupyterhub-api
