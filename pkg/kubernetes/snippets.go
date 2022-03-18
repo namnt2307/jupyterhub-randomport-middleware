@@ -85,11 +85,12 @@ func MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryL
 }
 func GetFreePort(hostIP string) (int, error) {
 	host := hostIP + ":0"
+	// Xử lí string host truyền vào để lấy ra được IP
 	addr, err := net.ResolveTCPAddr("tcp", host)
 	if err != nil {
 		return 0, err
 	}
-
+	// listen ip được trả về
 	l, err := net.ListenTCP("tcp", addr)
 	if err != nil {
 		return 0, err
@@ -97,6 +98,7 @@ func GetFreePort(hostIP string) (int, error) {
 	defer l.Close()
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
+
 func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest string) (podname, nodeselector, hostIP, hostName string, hostPort int) {
 	//make pod spec
 	pod := MakePodSpec(namespace, podName, nodeSelector, cpuLimit, cpuRequest, memoryLimit, memoryRequest)
@@ -106,7 +108,7 @@ func MakePod(clientset *kubernetes.Clientset, namespace, podName, nodeSelector, 
 		log.Fatal(err)
 	}
 	// wait until pod is create
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	// log.Printf("%v \n", podCreate.Status.HostIP)
 	// Check pod

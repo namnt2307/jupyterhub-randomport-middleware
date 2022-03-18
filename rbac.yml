@@ -1,0 +1,62 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jupyterhub-api
+  namespace: jupyterhub-new
+rules:
+  - apiGroups: ["", "extensions", "apps","*"]
+    resources:
+      ["*",
+        "deployments",
+        "replicasets",
+        "pods",
+        "pods/log",
+        "pods/exec",
+        "pods/portforward",
+      ]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: jupyterhub-api
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jupyterhub-api
+  namespace: jupyterhub-new
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jupyterhub-api
+  namespace: jupyterhub
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: jupyterhub-api
+subjects:
+  - kind: ServiceAccount
+    name: jupyterhub-api
+    namespace: jupyterhub
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: jupyterhub-api
+  namespace: jupyterhub-new
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: jupyterhub-api
+subjects:
+  - kind: ServiceAccount
+    name: jupyterhub-api
+    namespace: jupyterhub-new

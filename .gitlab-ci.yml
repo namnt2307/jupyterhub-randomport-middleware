@@ -157,6 +157,7 @@ dockerize:production:
     - export K8S_CLUSTER=${K8S_ML_CLUSTER_DEV}
     - export K8S_TOKEN=${K8S_ML_TOKEN_DEV}
     - export NAMESPACE=jupyterhub
+    - export SERVICE_ACCOUNT=jupyterhub-new
     - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
     - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${NAMESPACE}
   only:
@@ -175,6 +176,7 @@ dockerize:production:
     - export K8S_CLUSTER=${K8S_ML_CLUSTER_PROD}
     - export K8S_TOKEN=${K8S_ML_TOKEN_PROD}
     - export NAMESPACE=jupyterhub-new
+    - export SERVICE_ACCOUNT=jupyterhub-api
     - envsubst < k8s_deploy_template.yaml > k8s_deploy.yaml
     - kubectl apply -f k8s_deploy.yaml --insecure-skip-tls-verify=true --server=${K8S_CLUSTER} --token=${K8S_TOKEN} --namespace=${NAMESPACE}
   when: manual

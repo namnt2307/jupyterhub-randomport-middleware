@@ -23,7 +23,7 @@ spec:
         app: ${APP_NAME}
     spec:
       hostNetwork: true
-      serviceAccountName: jupyterhub
+      serviceAccountName: ${SERVICE_ACCOUNT}
       hostAliases:
         - ip: "172.24.178.16"
           hostnames:
@@ -35,14 +35,14 @@ spec:
         - name: ${APP_NAME}
           image: ${IMAGE_TAG}
           ports:
-            - containerPort: 8000
+            - containerPort: 2307
           resources:
             limits:
-              cpu: 1000m
-              memory: 1000Mi
+              cpu: 2000m
+              memory: 2000Mi
             requests:
-              cpu: 300m
-              memory: 600Mi
+              cpu: 500m
+              memory: 1000Mi
           lifecycle:
             preStop:
               exec:
